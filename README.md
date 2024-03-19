@@ -38,3 +38,6 @@ I'm not sure how to handle the "Turing Treatise" item, and the "Enigma Tirpitz, 
 The program does a fair bit of configuration checking - the aim is to not allow a historically unavailable config.  I'm not aware of anything I've missed on that front, but I may have overlooked something and will make modifications as I discover issues.
 
 Have fun!
+
+***Planned Improvements***
+o Add memoization of reverse rotor maps to avoid computing them repeatedly.
