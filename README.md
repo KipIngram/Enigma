@@ -5,5 +5,5 @@ Python file "enigma" is the emulator.  It's built with the Python package argpar
 
 The fully manual mode looks like this:
 
-./enigma -p <plug config> -r <rotor config> -u <ukw/reflector config> -s <start position> <text>
+./enigma -p 'plug config' -r 'rotor config' -u 'ukw/reflector config' -s 'start position' 'text'
 
