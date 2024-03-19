@@ -39,5 +39,6 @@ The program does a fair bit of configuration checking - the aim is to not allow 
 
 Have fun!
 
-***Planned Improvements***
+Planned Improvements
+----------------------------
 o Add memoization of reverse rotor maps to avoid computing them repeatedly.
