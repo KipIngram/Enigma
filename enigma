@@ -1,0 +1,307 @@
+#!/bin/python
+
+import sys, argparse
+from datetime import datetime
+
+maps = {
+  'PLUG'      : ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', ''  ],
+  'ETW'       : ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', ''  ],
+  'I'         : ['EKMFLGDQVZNTOWYHXUSPAIBRCJ', 'Q' ],
+  'II'        : ['AJDKSIRUXBLHWTMCQGZNPYFVOE', 'E' ],
+  'III'       : ['BDFHJLCPRTXVZNYEIWGAKMUSQO', 'V' ],
+  'IV'        : ['ESOVPZJAYQUIRHXLNFTGKDCMWB', 'J' ],
+  'V'         : ['VZBRGITYUPSDNHLXAWMJQOFECK', 'Z' ],
+  'VI'        : ['JPGVOUMFYQBENHZRDKASXLICTW', 'ZM'],
+  'VII'       : ['NZJHGRCXMYSWBOUFAIVLPEKQDT', 'ZM'],
+  'VIII'      : ['FKQHTLXOCBJSPDZRAMEWNIUYGV', 'ZM'],
+  'Beta'      : ['LEYJVCNIXWPBQMDRTAKZGFUHOS', ''  ],
+  'Gamma'     : ['FSOKANUERHMBTIYCWLQPZXVGJD', ''  ],
+  'UKW-A'     : ['EJMZALYXVBWFCRQUONTSPIKHGD', ''  ],
+  'UKW-B'     : ['YRUHQSLDPXNGOKMIEBFZCWVJAT', ''  ],
+  'UKW-C'     : ['RDOBJNTKVEHMLFCWZAXGYIPSUQ', ''  ],
+  'UKW-BThin' : ['ENKQAUYWJICOPBLMDXZVFTHRGS', ''  ],
+  'UKW-CThin' : ['RDOBJNTKVEHMLFCWZAXGYIPSUQ', ''  ]
+}  
+
+ROMAN_ROTORS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
+GREEK_ROTORS = ['Beta', 'Gamma']
+ROTORS = ROMAN_ROTORS + GREEK_ROTORS
+WIDE_REFLECTORS = ['UKW-A', 'UKW-B', 'UKW-C']
+THIN_REFLECTORS = ['UKW-BThin', 'UKW-CThin']
+REFLECTORS = WIDE_REFLECTORS + THIN_REFLECTORS
+
+LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
+def config(plugs, rings, ukw):
+  global maps, stack, debug
+  used = [False] * 26
+  board = LETTERS
+  for plug in plugs:
+    if len(plug) != 2:
+      print('Invalid plug option!')
+      exit()
+    lo = ord(plug[0])-ord('A') ; hi = ord(plug[1])-ord('A')
+    if lo == hi:
+      print('Invalid plug option!')
+      exit()
+    if lo > hi:
+      temp = lo ; lo = hi ; hi = temp
+    if used[lo] or used[hi]:
+      print('Duplicate plug specified!')
+      exit()
+    used[lo] = used[hi] = True
+    board = board[:lo] + board[hi] + board[lo+1:hi] + board[lo] + board[hi+1:]
+    maps['PLUG'] = [board, '']
+  stack = [ ['PLUG',1,'A'], ['ETW',1,'A'] ]
+  used = []
+  for ring in rings:
+    if not(ring[0] in ROTORS):
+      print('Invalid ring specified ('+ring[0]+')!')
+      exit()
+    if ring[0] in used:
+      print('Duplicate ring specified!')
+      exit
+    used.append(ring[0])
+    stack.append(ring)
+    stack[-1].append('A')
+  if len(used) == 3:
+    if ('Beta' in used) or ('Gamma' in used):
+      print('Invalid use of Beta/Gamma ring!')
+      exit()
+    if not(ukw in WIDE_REFLECTORS):
+      print('Invalid reflector: '+ukw+'!')
+      exit()
+  if len(used) == 4:
+    if not(rings[0][0] in GREEK_ROTORS):
+      print('Invalid leftmost ring ('+ring[0]+')!')
+      exit()
+    if ('Beta' in used[1:]) or ('Gamma' in used[1:]):
+      print('Invalid use of Beta/Gamma ring!')
+      exit()
+    if not(ukw in THIN_REFLECTORS):
+      print('Invalid reflector: '+ukw+'!')
+      exit()
+  stack.append([ukw,1,'A'])
+
+
+def set_rings(positions):
+    global maps, stack, debug
+    index = 0
+    for i in range(len(stack)):
+      if stack[i][0] in ROTORS:
+        stack[i][2] = positions[index] ; index += 1
+    if index != len(positions):
+      print('Incorrect starting position length!')
+      exit()
+
+
+def show_rings():
+  val = ''
+  for item in stack:
+    if item[0] in ROTORS:
+      val += item[2]
+  eprint('rotor positions : '+val)
+
+
+def step_rings():
+  global maps, stack, debug
+  index = len(stack) - 2 ; rings = []
+  while stack[index][0] in ROTORS:
+    rings.append([index, False])
+    index -= 1
+  rings[0][1] = True
+  for i in range(len(rings)-1):
+    name = stack[rings[i][0]][0]
+    if stack[rings[i][0]][2] in maps[name][1]:
+      rings[i][1] = True ; rings[i+1][1] = True
+  for ring in rings:
+    if ring[1]:
+      index = ring[0]
+      val = ord(stack[index][2]) + 1
+      if val > ord('Z'):
+        val = ord('A')
+      stack[index][2] = chr(val)
+  if debug:
+    show_rings()
+
+
+def forward_map(ch, index):
+  global maps, stack, debug
+  offset = stack[index][1] - 1
+  position = ord(stack[index][2]) - ord('A')
+  map = maps[stack[index][0]][0]
+  value = ord(ch) - ord('A')
+  value = (value - offset + position) % 26
+  value = (ord(map[value]) - ord('A') + offset - position) % 26
+  return(chr(value + ord('A')))
+
+
+def reverse_map(ch, index):
+  global maps, stack, debug
+  offset = stack[index][1] - 1
+  position = ord(stack[index][2]) - ord('A')
+  fmap = maps[stack[index][0]][0]
+  map = ''
+  for x in LETTERS:
+    index = fmap.find(x)
+    map += chr(index + ord('A'))
+  value = ord(ch) - ord('A')
+  value = (value - offset + position) % 26
+  value = (ord(map[value]) - ord('A') + offset - position) % 26
+  return(chr(value + ord('A')))
+
+
+def map(cin):
+  global maps, stack, debug
+  cout = forward_map(cin, 0)
+  if debug:
+    eprint('----------------------')
+    eprint('in'.ljust(10)+': '+cin)
+    eprint('plugs'.ljust(10)+': '+cout)
+  cout = forward_map(cout, 1)
+  index = len(stack) - 2
+  while stack[index][0] in ROTORS:
+    cout = forward_map(cout, index)
+    if debug:
+      eprint(stack[index][0].ljust(10)+': '+cout)
+    index -= 1
+  cout = forward_map(cout, len(stack)-1)
+  if debug:
+    eprint(stack[-1][0].ljust(10)+': '+cout)
+  index = 2
+  while stack[index][0] in ROTORS:
+    cout = reverse_map(cout, index)
+    if debug:
+      eprint(stack[index][0].ljust(10)+': '+cout)
+    index += 1
+  cout = forward_map(cout, 0)
+  if debug:
+    eprint('plugs'.ljust(10)+': '+cout)
+    eprint('result'.ljust(10)+': '+cout)
+    eprint('----------------------')
+  return(cout)
+
+
+def get_config():
+  global args, debug
+
+  if args.auto:
+    day = int(str(datetime.today())[8:10])
+    if debug:
+      eprint('using auto mode with day '+day)
+    file = 'keys.txt'
+    if args.key != None:
+      file = args.key
+    if debug:
+      eprint('using key file '+file)
+      eprint('----------------------')
+    found = False
+    with open(file,'r') as f:
+      for line in f:
+        parts = line.split('|')
+        if int(parts[0]) == day:
+          plug_string = parts[1].strip()
+          rotor_string = parts[2].strip()
+          ukw = parts[3].strip()
+          start = parts[4].strip()
+          found = True
+          break
+    if not found:
+      print('No code sheet entry for this day of the month!')
+      exit()
+  else:
+    plug_string = args.plugs
+    rotor_string = args.rotors
+    ukw = args.ukw
+    start = args.start
+
+  if debug:
+    eprint('plugs  : '+plug_string)
+    eprint('rotors : '+rotor_string)
+    eprint('ukw    : '+ukw)
+    eprint('start  : '+start)
+    eprint('----------------------')
+
+  raw_plugs = plug_string.split(' ')
+  plugs = []
+  for item in raw_plugs:
+    if len(item) > 0:
+      plugs.append(item)  
+  pairs = rotor_string.split(' ')
+  rotors = []
+  for pair in pairs:
+    if len(pair) > 0:
+      rotor = pair.strip().split("/")
+      rotor[1] = int(rotor[1])
+      rotors.append(rotor)
+
+  config(plugs, rotors, ukw)
+  set_rings(start)
+
+
+def map_string(str):
+  global args
+  chunk = int(args.chunk)
+  # Enforce all upper case and remove spaces to handle things like "ABCDE GHIJK LMNOP..."
+  str = str.replace(' ', '').upper()
+  result = ''
+  for ch in str:
+    if ch in LETTERS:
+      step_rings()
+      result += map(ch)
+  # Break result into five-character blocks
+  spaces = int((len(result)-1)/chunk)
+  while spaces > 0:
+    result = result[:chunk*spaces]+' '+result[chunk*spaces:]
+    spaces -= 1
+  return(result)
+
+
+parser = argparse.ArgumentParser(description='A historically accurate emulator of German Enigma cipher machines')
+parser.add_argument('text', help='the text string to encrypt or decrypt')
+parser.add_argument('-a', '--auto', help='use key prefix protocol automatically', action='store_true')
+parser.add_argument('-c', '--chunk', default=5, help='block size for output (default 5)')
+parser.add_argument('-d', '--debug', help='print detailed operational info to stderr', action='store_true')
+parser.add_argument('-k', '--key', help='key file to get daily config from (default keys.txt)')
+parser.add_argument('-p', '--plugs', help='quoted string of space-separated letter pairs specifying plug board configuration')
+parser.add_argument('-r', '--rotors', help='quoted string of space-separated rotor_name/ring_setting pairs')
+parser.add_argument('-s', '--start', help='string of letters giving rotor starting positions')
+parser.add_argument('-u', '--ukw', help='name of a valid reflector/ukw')
+args = parser.parse_args()
+
+debug = args.debug
+if debug:
+  eprint(args)
+  eprint('----------------------')
+
+get_config()
+if args.auto:
+  # Automated operation using code sheet and "per message" start protocol
+  if args.start == None:
+    # Decrypting: get message start position from first three chars
+    key = map_string(args.text[0:3])
+    # Use message key to decrypt the rest
+    set_rings(key)
+    result = map_string(args.text[3:])
+    # Print actual message, or print decrypted start key if it's all that's given
+    if len(result) > 0:
+      print(result)
+    else:
+      print(key)
+    exit()
+  else:
+    # Encrypting: start parameter specifies "per message" start position
+    result = map_string(args.start)  # encrypt per-message start using code sheet start
+    set_rings(args.start)  # use supplied per-message start for actual text
+    result += map_string(args.text)
+    print(result)
+    exit()
+else:
+  # Fully manual operation - all parameters must be given on command line
+  print(map_string(args.text))
+
