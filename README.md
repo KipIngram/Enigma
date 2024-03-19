@@ -32,3 +32,7 @@ and the decryptions of these are found here:
 http://wiki.franklinheath.co.uk/index.php/Enigma/Sample_Decrypts
 
 I'm not sure how to handle the "Turing Treatise" item, and the "Enigma Tirpitz, 1944" item seems to involve some strange special case manual manipulation of the leftmost ring - the program doesn't know how to handle that.  On all of the other items, though, it produces correct results.
+
+The program does a fair bit of configuration checking - the aim is to not allow a historically unavailable config.  I'm not aware of anything I've missed on that front, but I may have overlooked something and will make modifications as I discover issues.
+
+Have fun!
