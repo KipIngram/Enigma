@@ -7,6 +7,8 @@ The fully manual mode looks like this:
 
 ./enigma -p 'plug config' -r 'rotor config' -u 'ukw/reflector config' -s 'start position' 'text'
 
+Available rotor and reflector choices appear in an array near the top of the Python file "enigma."
+
 Automated mode uses a variant of the actual German "per message start position" procedure.  To send a message using auto mode, type
 
 ./enigma -a -s 'start' 'text'
