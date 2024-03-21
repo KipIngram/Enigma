@@ -41,4 +41,4 @@ Have fun!
 
 Planned Improvements
 ----------------------------
-o Add memoization of reverse rotor maps to avoid computing them repeatedly.
+o DONE 2024-03-21 - Add memoization of reverse rotor maps to avoid computing them repeatedly.

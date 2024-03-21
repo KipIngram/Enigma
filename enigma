@@ -310,4 +310,3 @@ if args.auto:
 else:
   # Fully manual operation - all parameters must be given on command line
   print(map_string(args.text))
-
