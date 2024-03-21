@@ -1,6 +1,6 @@
 #!/bin/python
 
-import sys, argparse
+import sys, argparse, time
 from datetime import datetime
 
 maps = {
@@ -145,11 +145,14 @@ def reverse_map(ch, index):
   global maps, stack, debug
   offset = stack[index][1] - 1
   position = ord(stack[index][2]) - ord('A')
-  fmap = maps[stack[index][0]][0]
-  map = ''
-  for x in LETTERS:
-    index = fmap.find(x)
-    map += chr(index + ord('A'))
+  if len(maps[stack[index][0]]) == 2:
+    fmap = maps[stack[index][0]][0]
+    map = ''
+    for x in LETTERS:
+      idx = fmap.find(x)
+      map += chr(idx + ord('A'))
+    maps[stack[index][0]].append(map)
+  map = maps[stack[index][0]][2]
   value = ord(ch) - ord('A')
   value = (value - offset + position) % 26
   value = (ord(map[value]) - ord('A') + offset - position) % 26
@@ -249,6 +252,7 @@ def map_string(str):
   chunk = int(args.chunk)
   # Enforce all upper case and remove spaces to handle things like "ABCDE GHIJK LMNOP..."
   str = str.replace(' ', '').upper()
+#  ti = time.time()
   result = ''
   for ch in str:
     if ch in LETTERS:
@@ -259,6 +263,8 @@ def map_string(str):
   while spaces > 0:
     result = result[:chunk*spaces]+' '+result[chunk*spaces:]
     spaces -= 1
+#  tf = time.time()
+#  eprint('time'.ljust(10)+': ', (tf-ti)/len(str))
   return(result)
 
 
