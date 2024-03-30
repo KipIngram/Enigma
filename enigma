@@ -3,25 +3,27 @@
 import sys, argparse, time
 from datetime import datetime
 
-maps = {
-  'PLUG'      : ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', ''  ],
-  'ETW'       : ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', ''  ],
-  'I'         : ['EKMFLGDQVZNTOWYHXUSPAIBRCJ', 'Q' ],
-  'II'        : ['AJDKSIRUXBLHWTMCQGZNPYFVOE', 'E' ],
-  'III'       : ['BDFHJLCPRTXVZNYEIWGAKMUSQO', 'V' ],
-  'IV'        : ['ESOVPZJAYQUIRHXLNFTGKDCMWB', 'J' ],
-  'V'         : ['VZBRGITYUPSDNHLXAWMJQOFECK', 'Z' ],
-  'VI'        : ['JPGVOUMFYQBENHZRDKASXLICTW', 'ZM'],
-  'VII'       : ['NZJHGRCXMYSWBOUFAIVLPEKQDT', 'ZM'],
-  'VIII'      : ['FKQHTLXOCBJSPDZRAMEWNIUYGV', 'ZM'],
-  'Beta'      : ['LEYJVCNIXWPBQMDRTAKZGFUHOS', ''  ],
-  'Gamma'     : ['FSOKANUERHMBTIYCWLQPZXVGJD', ''  ],
-  'UKW-A'     : ['EJMZALYXVBWFCRQUONTSPIKHGD', ''  ],
-  'UKW-B'     : ['YRUHQSLDPXNGOKMIEBFZCWVJAT', ''  ],
-  'UKW-C'     : ['RDOBJNTKVEHMLFCWZAXGYIPSUQ', ''  ],
-  'UKW-BThin' : ['ENKQAUYWJICOPBLMDXZVFTHRGS', ''  ],
-  'UKW-CThin' : ['RDOBJNTKVEHMLFCWZAXGYIPSUQ', ''  ]
-}  
+maps = {                                                #   4"  2"
+# --------------------------------------------------------------------------------------------------------
+  'PLUG'      : ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', ''  ],   #   1   1   These are notes about the physical       
+  'ETW'       : ['ABCDEFGHIJKLMNOPQRSTUVWXYZ', ''  ],   #   3   1   Enigma unit I'm contemplating making.
+  'I'         : ['EKMFLGDQVZNTOWYHXUSPAIBRCJ', 'Q' ],   #   3   1
+  'II'        : ['AJDKSIRUXBLHWTMCQGZNPYFVOE', 'E' ],   #   3   1
+  'III'       : ['BDFHJLCPRTXVZNYEIWGAKMUSQO', 'V' ],   #   3   1
+  'IV'        : ['ESOVPZJAYQUIRHXLNFTGKDCMWB', 'J' ],   #   3   1
+  'V'         : ['VZBRGITYUPSDNHLXAWMJQOFECK', 'Z' ],   #   3   1
+  'VI'        : ['JPGVOUMFYQBENHZRDKASXLICTW', 'ZM'],   #   3   1
+  'VII'       : ['NZJHGRCXMYSWBOUFAIVLPEKQDT', 'ZM'],   #   3   1
+  'VIII'      : ['FKQHTLXOCBJSPDZRAMEWNIUYGV', 'ZM'],   #   3   1
+  'Beta'      : ['LEYJVCNIXWPBQMDRTAKZGFUHOS', ''  ],   #   3   1
+  'Gamma'     : ['FSOKANUERHMBTIYCWLQPZXVGJD', ''  ],   #   3   1
+  'UKW-A'     : ['EJMZALYXVBWFCRQUONTSPIKHGD', ''  ],   #   1   1
+  'UKW-B'     : ['YRUHQSLDPXNGOKMIEBFZCWVJAT', ''  ],   #   1   1
+  'UKW-C'     : ['RDOBJNTKVEHMLFCWZAXGYIPSUQ', ''  ],   #   1   1
+  'UKW-BThin' : ['ENKQAUYWJICOPBLMDXZVFTHRGS', ''  ],   #   1   1
+  'UKW-CThin' : ['RDOBJNTKVEHMLFCWZAXGYIPSUQ', ''  ]    #   1   1
+# --------------------------------------------------------------------------------------------------------
+}                                                       #  39  17
 
 ROMAN_ROTORS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
 GREEK_ROTORS = ['Beta', 'Gamma']
@@ -218,7 +220,9 @@ def get_config():
       print('No code sheet entry for this day of the month!')
       exit()
   else:
-    plug_string = args.plugs
+    plug_string = ''
+    if args.plugs != None:
+      plug_string = args.plugs
     rotor_string = args.rotors
     ukw = args.ukw
     start = args.start
